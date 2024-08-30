@@ -360,3 +360,25 @@ spec:
       - name: tmp
         emptyDir: {}
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: details-v2
+  namespace: bookinfo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: details
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: details
+        version: v2
+    spec:
+      containers:
+      - name: details
+        image: us-East1-docker.pkg.dev/dogfood-cx/registryrepository/dogfood-always-503:latest
+        ports:
+        - containerPort: 9080
