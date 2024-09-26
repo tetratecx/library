@@ -364,7 +364,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: details-v2
-  namespace: bookinfo
 spec:
   replicas: 1
   selector:
