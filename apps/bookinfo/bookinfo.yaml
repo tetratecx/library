@@ -382,3 +382,49 @@ spec:
         image: us-East1-docker.pkg.dev/dogfood-cx/registryrepository/dogfood-always-503:latest
         ports:
         - containerPort: 9080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpage-v2
+  labels:
+    app: productpage
+    version: v2
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: productpage
+      version: v2
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9080"
+        prometheus.io/path: "/metrics"
+      labels:
+        app: productpage
+        version: v2
+    spec:
+      serviceAccountName: bookinfo-productpage
+      containers:
+      - name: productpage
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/dogfood-productpage:latest
+        imagePullPolicy: Always
+        env:
+#        - name: DETAILS_FQDN
+#          value: details.sandbox.tetrate.io
+        - name: DETAILS_SERVICE_PORT
+          value: "80"
+        - name: VENDOR_URL
+          value: "http://apibin.tfc.dogfood.sandbox.tetrate.io/get"
+        - name: VENDOR_CHECK_FREQUENCY
+          value: "60"
+        ports:
+        - containerPort: 9080
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
