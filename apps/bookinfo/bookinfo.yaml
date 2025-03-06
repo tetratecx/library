@@ -76,6 +76,13 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
 ---
 ##################################################################################################
 # Ratings service
@@ -127,6 +134,13 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -154,6 +168,13 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9079
+        resources:
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
 ---
 ##################################################################################################
 # Reviews service
@@ -208,6 +229,13 @@ spec:
           value: "/tmp/logs"
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
         volumeMounts:
         - name: tmp
           mountPath: /tmp
@@ -248,6 +276,13 @@ spec:
           value: "/tmp/logs"
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
         volumeMounts:
         - name: tmp
           mountPath: /tmp
@@ -288,6 +323,13 @@ spec:
           value: "/tmp/logs"
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
         volumeMounts:
         - name: tmp
           mountPath: /tmp
@@ -353,6 +395,13 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
         volumeMounts:
         - name: tmp
           mountPath: /tmp
@@ -381,6 +430,13 @@ spec:
         image: us-East1-docker.pkg.dev/dogfood-cx/registryrepository/dogfood-always-503:latest
         ports:
         - containerPort: 9080
+        resources:
+          limits:
+            cpu: 50m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -410,6 +466,13 @@ spec:
       - name: productpage
         image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/dogfood-productpage:latest
         imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
         env:
 #        - name: DETAILS_FQDN
 #          value: details.sandbox.tetrate.io
