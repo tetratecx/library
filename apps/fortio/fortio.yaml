@@ -57,10 +57,3 @@ spec:
           name: http-fortio
         - containerPort: 8079
           name: grpc-ping
-        resources:
-          limits:
-            cpu: 500m
-            memory: 512Mi
-          requests:
-            cpu: 50m
-            memory: 256Mi

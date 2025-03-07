@@ -58,13 +58,6 @@ spec:
         volumeMounts:
         - mountPath: /etc/sleep/tls
           name: secret-volume
-        resources:
-          limits:
-            cpu: 200m
-            memory: 512Mi
-          requests:
-            cpu: 100m
-            memory: 256Mi
       volumes:
       - name: secret-volume
         secret:
