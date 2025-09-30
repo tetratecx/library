@@ -1,0 +1,692 @@
+# Copyright Istio Authors
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+##################################################################################################
+# This file defines the services, service accounts, and deployments for the Transaction Portal sample
+# using the Giraffe unified service mesh testing tool.
+#
+# To apply all Transaction Portal services, their corresponding service accounts, and deployments:
+#
+#   kubectl apply -f transaction-portal.yaml
+#
+# Alternatively, you can deploy any resource separately:
+#
+#   kubectl apply -f transaction-portal.yaml -l service=fraud-detection # fraud-detection Service
+#   kubectl apply -f transaction-portal.yaml -l account=fraud-detection # fraud-detection ServiceAccount
+#   kubectl apply -f transaction-portal.yaml -l app=fraud-detection,version=v2 # fraud-detection-v2 Deployment
+##################################################################################################
+
+##################################################################################################
+# Account Service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-service
+  labels:
+    app: account-service
+    service: account-service
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: account-service
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: transaction-account-service
+  labels:
+    account: account-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-service-v1
+  labels:
+    app: account-service
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: account-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: account-service
+        version: v1
+    spec:
+      serviceAccountName: transaction-account-service
+      containers:
+      - name: account-service
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "account-service"
+        - name: SERVICE_VERSION
+          value: "v1"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: CALL_UPSTREAMS
+          value: "false"
+        - name: RESPONSE_TEMPLATE
+          value: '{"service":"account-service","account_id":"12345","account_type":"checking","balance":1500.00,"status":"active","last_activity":"2024-01-01T10:00:00Z"}'
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-service-v2
+  labels:
+    app: account-service
+    version: v2
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: account-service
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: account-service
+        version: v2
+    spec:
+      serviceAccountName: transaction-account-service
+      containers:
+      - name: account-service
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "account-service"
+        - name: SERVICE_VERSION
+          value: "v2"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: ERROR_RATE
+          value: "1.0"
+        - name: ERROR_STATUS_CODE
+          value: "503"
+        - name: ERROR_MESSAGE
+          value: "Account service temporarily unavailable"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+##################################################################################################
+# Risk Assessment Service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: risk-assessment
+  labels:
+    app: risk-assessment
+    service: risk-assessment
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: risk-assessment
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: transaction-risk-assessment
+  labels:
+    account: risk-assessment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risk-assessment-v1
+  labels:
+    app: risk-assessment
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: risk-assessment
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: risk-assessment
+        version: v1
+    spec:
+      serviceAccountName: transaction-risk-assessment
+      containers:
+      - name: risk-assessment
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "risk-assessment"
+        - name: SERVICE_VERSION
+          value: "v1"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: CALL_UPSTREAMS
+          value: "false"
+        - name: RESPONSE_TEMPLATE
+          value: '{"service":"risk-assessment","transaction_id":"txn-001","risk_score":75,"risk_level":"medium","factors":["unusual_amount","new_merchant"],"recommendation":"manual_review"}'
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risk-assessment-v2
+  labels:
+    app: risk-assessment
+    version: v2
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: risk-assessment
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: risk-assessment
+        version: v2
+    spec:
+      serviceAccountName: transaction-risk-assessment
+      containers:
+      - name: risk-assessment
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "risk-assessment"
+        - name: SERVICE_VERSION
+          value: "v2"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: RESPONSE_DELAY_MS
+          value: "3000"
+        - name: ERROR_RATE
+          value: "0.2"
+        - name: ERROR_STATUS_CODE
+          value: "500"
+        - name: ERROR_MESSAGE
+          value: "Risk assessment model failure"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: RESPONSE_TEMPLATE
+          value: '{"service":"risk-assessment","transaction_id":"txn-001","risk_score":95,"risk_level":"high","factors":["suspicious_pattern","high_amount","multiple_attempts"],"recommendation":"block_transaction"}'
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+##################################################################################################
+# Fraud Detection Service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: fraud-detection
+  labels:
+    app: fraud-detection
+    service: fraud-detection
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: fraud-detection
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: transaction-fraud-detection
+  labels:
+    account: fraud-detection
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-detection-v1
+  labels:
+    app: fraud-detection
+    version: v1
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: fraud-detection
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: fraud-detection
+        version: v1
+    spec:
+      serviceAccountName: transaction-fraud-detection
+      containers:
+      - name: fraud-detection
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "fraud-detection"
+        - name: SERVICE_VERSION
+          value: "v1"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: CALL_UPSTREAMS
+          value: "false"
+        - name: RESPONSE_TEMPLATE
+          value: '{"service":"fraud-detection","transaction_id":"txn-001","fraud_score":15,"fraud_detected":false,"analysis":"normal_transaction_pattern","processing_time":"45ms"}'
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-detection-v2
+  labels:
+    app: fraud-detection
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fraud-detection
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: fraud-detection
+        version: v2
+    spec:
+      serviceAccountName: transaction-fraud-detection
+      containers:
+      - name: fraud-detection
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "fraud-detection"
+        - name: SERVICE_VERSION
+          value: "v2"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: UPSTREAM_URLS
+          value: "http://risk-assessment:9080"
+        - name: UPSTREAM_PATH
+          value: "/risk-assessment"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: RESPONSE_FIELD_FRAUD_MODEL
+          value: "ml_v2"
+        - name: RESPONSE_FIELD_ENHANCED_ANALYSIS
+          value: "true"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-detection-v3
+  labels:
+    app: fraud-detection
+    version: v3
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: fraud-detection
+      version: v3
+  template:
+    metadata:
+      labels:
+        app: fraud-detection
+        version: v3
+    spec:
+      serviceAccountName: transaction-fraud-detection
+      containers:
+      - name: fraud-detection
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "fraud-detection"
+        - name: SERVICE_VERSION
+          value: "v3"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: UPSTREAM_URLS
+          value: "http://risk-assessment:9080"
+        - name: UPSTREAM_PATH
+          value: "/risk-assessment"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: RESPONSE_DELAY_MS
+          value: "200"
+        - name: RESPONSE_FIELD_FRAUD_MODEL
+          value: "ml_v3_advanced"
+        - name: RESPONSE_FIELD_REAL_TIME_ANALYSIS
+          value: "true"
+        - name: RESPONSE_FIELD_CONFIDENCE_SCORE
+          value: "0.95"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+##################################################################################################
+# Transaction Portal Service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-portal
+  labels:
+    app: transaction-portal
+    service: transaction-portal
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: transaction-portal
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: transaction-portal
+  labels:
+    account: transaction-portal
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-portal-v1
+  labels:
+    app: transaction-portal
+    version: v1
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: transaction-portal
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9080"
+        prometheus.io/path: "/metrics"
+      labels:
+        app: transaction-portal
+        version: v1
+    spec:
+      serviceAccountName: transaction-portal
+      containers:
+      - name: transaction-portal
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "transaction-portal"
+        - name: SERVICE_VERSION
+          value: "v1"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: UPSTREAM_URLS
+          value: "http://account-service:9080,http://fraud-detection:9080"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: INCLUDE_HEADERS
+          value: "true"
+        - name: RESPONSE_FIELD_PORTAL_VERSION
+          value: "basic"
+        - name: RESPONSE_FIELD_TRANSACTION_TYPE
+          value: "standard"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-portal-v2
+  labels:
+    app: transaction-portal
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-portal
+      version: v2
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9080"
+        prometheus.io/path: "/metrics"
+      labels:
+        app: transaction-portal
+        version: v2
+    spec:
+      serviceAccountName: transaction-portal
+      containers:
+      - name: transaction-portal
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "transaction-portal"
+        - name: SERVICE_VERSION
+          value: "v2"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: UPSTREAM_URLS
+          value: "http://account-service:9080,http://fraud-detection:9080,http://risk-assessment:9080"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: INCLUDE_HEADERS
+          value: "true"
+        - name: INCLUDE_QUERY
+          value: "true"
+        - name: RESPONSE_FIELD_PORTAL_VERSION
+          value: "enhanced"
+        - name: RESPONSE_FIELD_TRANSACTION_TYPE
+          value: "comprehensive"
+        - name: RESPONSE_FIELD_VENDOR_CHECK
+          value: "enabled"
+        - name: RESPONSE_DELAY_MS
+          value: "100"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+---
+##################################################################################################
+# Traffic Generator for Transaction Portal
+##################################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-traffic-generator
+  labels:
+    app: transaction-traffic-generator
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transaction-traffic-generator
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: transaction-traffic-generator
+        version: v1
+    spec:
+      containers:
+      - name: traffic-generator
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9080
+        env:
+        - name: SERVICE_NAME
+          value: "transaction-traffic-generator"
+        - name: SERVICE_VERSION
+          value: "v1"
+        - name: SERVICE_PORT
+          value: "9080"
+        - name: UPSTREAM_URLS
+          value: "http://transaction-portal:9080"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "otel-collector:4317"
+        - name: INCLUDE_HEADERS
+          value: "true"
+        - name: RESPONSE_FIELD_GENERATOR_TYPE
+          value: "transaction_load_tester"
+        - name: RESPONSE_FIELD_TARGET_SERVICE
+          value: "transaction-portal"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
