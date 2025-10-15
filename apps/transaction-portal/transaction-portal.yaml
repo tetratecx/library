@@ -73,7 +73,7 @@ spec:
       serviceAccountName: transaction-account-service
       containers:
       - name: account-service
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -125,7 +125,7 @@ spec:
       serviceAccountName: transaction-account-service
       containers:
       - name: account-service
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -203,7 +203,7 @@ spec:
       serviceAccountName: transaction-risk-assessment
       containers:
       - name: risk-assessment
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -255,7 +255,7 @@ spec:
       serviceAccountName: transaction-risk-assessment
       containers:
       - name: risk-assessment
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -337,7 +337,7 @@ spec:
       serviceAccountName: transaction-fraud-detection
       containers:
       - name: fraud-detection
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -389,7 +389,7 @@ spec:
       serviceAccountName: transaction-fraud-detection
       containers:
       - name: fraud-detection
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -445,7 +445,7 @@ spec:
       serviceAccountName: transaction-fraud-detection
       containers:
       - name: fraud-detection
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -533,7 +533,7 @@ spec:
       serviceAccountName: transaction-portal
       containers:
       - name: transaction-portal
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -593,7 +593,7 @@ spec:
       serviceAccountName: transaction-portal
       containers:
       - name: transaction-portal
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
@@ -657,7 +657,7 @@ spec:
     spec:
       containers:
       - name: traffic-generator
-        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:latest
+        image: us-east1-docker.pkg.dev/dogfood-cx/registryrepository/giraffe:v1.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 9080
